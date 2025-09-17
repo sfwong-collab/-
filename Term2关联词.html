@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关联词挑战赛</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            padding: 25px;
+            text-align: center;
+            color: white;
+        }
+        
+        .title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .progress {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .question-container {
+            padding: 25px;
+        }
+        
+        .scenario {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .option {
+            padding: 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            background: #f1f8ff;
+            border-color: #4facfe;
+            transform: translateY(-2px);
+        }
+        
+        .selected {
+            background: #e7f5ff;
+            border-color: #4facfe;
+        }
+        
+        .correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        
+        .incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+        
+        .option-hint {
+            display: none;
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #343a40;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .option-hint::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px 5px 0 5px;
+            border-style: solid;
+            border-color: #343a40 transparent transparent transparent;
+        }
+        
+        .option:hover .option-hint {
+            display: block;
+        }
+        
+        .feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        
+        button {
+            padding: 14px 28px;
+            background: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: #3ba0fe;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .score-container {
+            text-align: center;
+            padding: 40px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .celebration {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 600px) {
+            .scenario {
+                font-size: 1.1rem;
+            }
+            
+            .option {
+                padding: 14px;
+                font-size: 1rem;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">关联词挑战赛</h1>
+            <p class="subtitle">选择正确的关联词完成句子</p>
+        </div>
+        
+        <div class="progress">
+            <span>题目 <span id="current">1</span>/<span id="total">10</span></span>
+            <span>得分: <span id="score">0</span></span>
+        </div>
+        
+        <div class="question-container">
+            <div class="scenario" id="scenario"></div>
+            
+            <div class="options" id="options"></div>
+            
+            <div class="feedback" id="feedback"></div>
+            
+            <div class="controls">
+                <button id="prev-btn" disabled><i class="fas fa-arrow-left"></i> 上一题</button>
+                <button id="next-btn">下一题 <i class="fas fa-arrow-right"></i></button>
+                <button id="submit-btn" style="display: none;">查看结果</button>
+            </div>
+        </div>
+        
+        <div class="score-container" id="score-container">
+            <div class="celebration">🎓✨🎉</div>
+            <h2>挑战完成！</h2>
+            <p>最终得分: <span id="final-score">0</span> / 10</p>
+            <p id="score-message"></p>
+            <button id="restart-btn" style="margin-top: 20px; max-width: 200px; margin: 20px auto;">
+                <i class="fas fa-redo"></i> 再玩一次
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 关联词情景题数据
+        const questions = [
+            {
+                scenario: "小明____听到闹钟铃声，____立刻起床准备上学。",
+                options: ["一旦...就", "既...也", "一边...一边"],
+                answer: 0,
+                hints: ["Once...then: Something happens immediately after condition is met", "Both...and: Having two qualities", "While...while: Doing two things at the same time"]
+            },
+            {
+                scenario: "____小红很喜欢吃冰淇淋，____妈妈不让她吃太多。",
+                options: ["因为...所以", "不仅...还", "虽然...但是"],
+                answer: 2,
+                hints: ["Because...so: Shows cause and effect", "Not only...but also: Adds additional information", "Although...but: Shows contrast"]
+            },
+            {
+                scenario: "小华____做作业，____听音乐，妈妈说这样不专心。",
+                options: ["虽然...但是", "一边...一边", "因为...所以"],
+                answer: 1,
+                hints: ["Although...but: Contrasting idea", "While...while: Doing two things simultaneously", "Because...so: Cause and effect relationship"]
+            },
+            {
+                scenario: "____小刚每天坚持练习，____他的书法越来越好。",
+                options: ["因为...所以", "一旦...就", "并不是...而是"],
+                answer: 0,
+                hints: ["Because...so: Cause and effect relationship", "Once...then: Immediate consequence", "Not...but rather: Correction or contrast"]
+            },
+            {
+                scenario: "____明天天气好，我们____去公园野餐。",
+                options: ["不仅...还", "虽然...但是", "如果...就"],
+                answer: 2,
+                hints: ["Not only...but also: Adding information", "Although...but: Contrasting idea", "If...then: Conditional situation"]
+            },
+            {
+                scenario: "小丽____会弹钢琴，____会拉小提琴，多才多艺。",
+                options: ["一旦...就", "不仅...还", "因为...所以"],
+                answer: 1,
+                hints: ["Once...then: Immediate action", "Not only...but also: Having multiple abilities", "Because...so: Cause and effect"]
+            },
+            {
+                scenario: "____小强很想看电视，____他必须先完成作业。",
+                options: ["如果...就", "虽然...但是", "一边...一边"],
+                answer: 1,
+                hints: ["If...then: Conditional situation", "Although...but: Contrasting desires", "While...while: Simultaneous actions"]
+            },
+            {
+                scenario: "小芳____不喜欢运动，____她没有找到合适的运动项目。",
+                options: ["并不是...而是", "一旦...就", "既...也"],
+                answer: 0,
+                hints: ["Not...but rather: Correcting a misconception", "Once...then: Immediate action", "Both...and: Having two qualities"]
+            },
+            {
+                scenario: "____遇到不懂的问题，____要向老师或同学请教。",
+                options: ["一边...一边", "虽然...但是", "如果...就"],
+                answer: 2,
+                hints: ["While...while: Simultaneous actions", "Although...but: Contrasting idea", "If...then: Conditional situation"]
+            },
+            {
+                scenario: "小明的书包____便宜，____实用，非常值得购买。",
+                options: ["如果...就", "因为...所以", "既...也"],
+                answer: 2,
+                hints: ["If...then: Conditional situation", "Because...so: Cause and effect", "Both...and: Having two qualities"]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let score = 0;
+
+        // 初始化页面
+        function initPage() {
+            document.getElementById('total').textContent = questions.length;
+            showQuestion();
+            
+            // 添加事件监听器
+            document.getElementById('prev-btn').addEventListener('click', showPreviousQuestion);
+            document.getElementById('next-btn').addEventListener('click', showNextQuestion);
+            document.getElementById('submit-btn').addEventListener('click', showScore);
+            document.getElementById('restart-btn').addEventListener('click', restartQuiz);
+        }
+
+        // 显示当前问题
+        function showQuestion() {
+            const scenarioElem = document.getElementById('scenario');
+            const optionsElem = document.getElementById('options');
+            const feedbackElem = document.getElementById('feedback');
+            const currentElem = document.getElementById('current');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            // 更新进度
+            currentElem.textContent = currentQuestion + 1;
+            
+            // 显示情景
+            scenarioElem.textContent = questions[currentQuestion].scenario;
+            
+            // 显示选项
+            optionsElem.innerHTML = '';
+            questions[currentQuestion].options.forEach((option, index) => {
+                const optionElem = document.createElement('div');
+                optionElem.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionElem.classList.add('selected');
+                }
+                
+                // 添加选项文本
+                const optionText = document.createElement('span');
+                optionText.textContent = option;
+                optionElem.appendChild(optionText);
+                
+                // 添加提示
+                const hintElem = document.createElement('div');
+                hintElem.className = 'option-hint';
+                hintElem.textContent = questions[currentQuestion].hints[index];
+                optionElem.appendChild(hintElem);
+                
+                optionElem.addEventListener('click', () => selectOption(index));
+                optionsElem.appendChild(optionElem);
+            });
+            
+            // 隐藏反馈
+            feedbackElem.style.display = 'none';
+            
+            // 更新按钮状态
+            prevBtn.disabled = currentQuestion === 0;
+            
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        // 选择选项
+        function selectOption(optionIndex) {
+            userAnswers[currentQuestion] = optionIndex;
+            
+            // 更新选项样式
+            document.querySelectorAll('.option').forEach((option, index) => {
+                option.classList.remove('selected');
+                if (index === optionIndex) {
+                    option.classList.add('selected');
+                }
+            });
+            
+            // 显示反馈
+            const feedbackElem = document.getElementById('feedback');
+            if (optionIndex === questions[currentQuestion].answer) {
+                feedbackElem.textContent = "✓ 答对了！你真棒！";
+                feedbackElem.className = "feedback correct";
+                score++;
+                document.getElementById('score').textContent = score;
+            } else {
+                feedbackElem.textContent = "✗ 再想想哦！";
+                feedbackElem.className = "feedback incorrect";
+            }
+            feedbackElem.style.display = 'block';
+        }
+
+        // 显示上一题
+        function showPreviousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        // 显示下一题
+        function showNextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            }
+        }
+
+        // 显示得分
+        function showScore() {
+            document.getElementById('final-score').textContent = score;
+            const scoreMessage = document.getElementById('score-message');
+            
+            if (score >= 9) {
+                scoreMessage.textContent = "太棒了！你是关联词小专家！";
+            } else if (score >= 7) {
+                scoreMessage.textContent = "很好！再多练习一下会更厉害！";
+            } else if (score >= 5) {
+                scoreMessage.textContent = "不错！继续加油哦！";
+            } else {
+                scoreMessage.textContent = "再加把劲！多练习就能进步！";
+            }
+            
+            document.getElementById('score-container').style.display = 'block';
+            document.querySelector('.question-container').style.display = 'none';
+            document.querySelector('.progress').style.display = 'none';
+        }
+
+        // 重新开始测验
+        function restartQuiz() {
+            currentQuestion = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            score = 0;
+            
+            document.getElementById('score-container').style.display = 'none';
+            document.querySelector('.question-container').style.display = 'block';
+            document.querySelector('.progress').style.display = 'block';
+            document.getElementById('score').textContent = "0";
+            
+            showQuestion();
+        }
+
+        // 页面加载时初始化
+        window.onload = initPage;
+    </script>
+</body>
+</html>
